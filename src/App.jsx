@@ -1,16 +1,25 @@
-import { useState, useEffect } from 'react';
-import Header from './Header';
-import PropertyCard from './PropertyCard';
+import { useState, useEffect } from "react";
+import Header from "./Header";
+import PropertyCard from "./PropertyCard";
 
 function App() {
   const [properties, setProperties] = useState();
 
+  const filterData = (searchTerm) => {
+    const results = properties.allData.filter((p) =>
+      p.short_description.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setProperties({ ...properties, filtered: results });
+  };
+
   useEffect(() => {
     const fetchPropertyData = async () => {
-      const response = await fetch('/property-data.json');
+      const response = await fetch("/property-data.json");
       const json = await response.json();
-
-      setProperties(json.result.properties.elements);
+      setProperties({
+        allData: json.result.properties.elements,
+        filtered: json.result.properties.elements,
+      });
     };
 
     fetchPropertyData();
@@ -18,10 +27,13 @@ function App() {
 
   return (
     <div className="container mx-auto my-5">
-      <Header />
+      <Header filterData={filterData} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-5">
-        {!!properties && properties.map((property) => <PropertyCard key={property.property_id} property={property} />)}
+        {!!properties &&
+          properties.filtered.map((property) => (
+            <PropertyCard key={property.property_id} property={property} />
+          ))}
       </div>
     </div>
   );
